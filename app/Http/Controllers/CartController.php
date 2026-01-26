@@ -46,24 +46,32 @@ class CartController extends Controller
 
     public function purchase(Request $request)
     {
+        // De las variables de sesión, leo los productos que quiere comprar el cliente
         $productsInSession = $request->session()->get("products");
+        // Si hay productos...
         if ($productsInSession) {
+            // Como es una ruta "autenticada" leo la información del usuario activo
             $userId = Auth::user()->getId();
+            // Creo un nuevo pedido con los datos iniciales que ya tengo y lo guardo
             $order = new Order();
             $order->setUserId($userId);
             $order->setTotal(0);
             $order->save();
 
             $total = 0;
+            // A partir de lo que hay en la sesión, leo todos los datos de los productos
             $productsInCart = Product::findMany(array_keys($productsInSession));
             foreach ($productsInCart as $product) {
+                // Recupero la cantidad de cada producto que ha pedidio el cliente
                 $quantity = $productsInSession[$product->getId()];
+                // Creo un item, leo asigno
                 $item = new Item();
                 $item->setQuantity($quantity);
                 $item->setPrice($product->getPrice());
                 $item->setProductId($product->getId());
                 $item->setOrderId($order->getId());
                 $item->save();
+                // Voy incrementanto la cantidad total del pedido, con el precio*cantidad 
                 $total = $total + ($product->getPrice()*$quantity);
             }
             $order->setTotal($total);
