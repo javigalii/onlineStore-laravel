@@ -2,6 +2,15 @@
 @section('title', $viewData['title'])
 @section('subtitle', $viewData['subtitle'])
 @section('content')
+
+    {{-- Bloque de error para saldo insuficiente  --}}
+    @if (session('error'))
+        <div class="alert alert-danger shadow-sm border-start border-danger border-4">
+            <i class="bi bi-exclamation-octagon-fill me-2"></i>
+            {{ session('error') }}
+        </div>
+    @endif
+
     <div class="card">
         <div class="card-header">
             Products in Cart

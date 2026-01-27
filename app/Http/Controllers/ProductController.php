@@ -11,7 +11,8 @@ class ProductController extends Controller{
         $viewData = [];
         $viewData["title"] = "Products - Online Store";
         $viewData["subtitle"] = "List of products";
-        $viewData["products"] = Product::all();
+        $viewData["products"] = Product::paginate(8); 
+        
         return view('product.index')->with("viewData", $viewData);
     }
 

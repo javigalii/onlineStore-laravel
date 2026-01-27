@@ -45,51 +45,58 @@ class CartController extends Controller
     }
 
     public function purchase(Request $request)
-    {
-        // De las variables de sesión, leo los productos que quiere comprar el cliente
-        $productsInSession = $request->session()->get("products");
-        // Si hay productos...
-        if ($productsInSession) {
-            // Como es una ruta "autenticada" leo la información del usuario activo
-            $userId = Auth::user()->getId();
-            // Creo un nuevo pedido con los datos iniciales que ya tengo y lo guardo
-            $order = new Order();
-            $order->setUserId($userId);
-            $order->setTotal(0);
-            $order->save();
+{
+    $productsInSession = $request->session()->get("products");
 
-            $total = 0;
-            // A partir de lo que hay en la sesión, leo todos los datos de los productos
-            $productsInCart = Product::findMany(array_keys($productsInSession));
-            foreach ($productsInCart as $product) {
-                // Recupero la cantidad de cada producto que ha pedidio el cliente
-                $quantity = $productsInSession[$product->getId()];
-                // Creo un item, leo asigno
-                $item = new Item();
-                $item->setQuantity($quantity);
-                $item->setPrice($product->getPrice());
-                $item->setProductId($product->getId());
-                $item->setOrderId($order->getId());
-                $item->save();
-                // Voy incrementanto la cantidad total del pedido, con el precio*cantidad 
-                $total = $total + ($product->getPrice()*$quantity);
-            }
-            $order->setTotal($total);
-            $order->save();
-
-            $newBalance = Auth::user()->getBalance() - $total;
-            Auth::user()->setBalance($newBalance);
-            Auth::user()->save();
-
-            $request->session()->forget('products');
-
-            $viewData = [];
-            $viewData["title"] = "Purchase - Online Store";
-            $viewData["subtitle"] =  "Purchase Status";
-            $viewData["order"] =  $order;
-            return view('cart.purchase')->with("viewData", $viewData);
-        } else {
-            return redirect()->route('cart.index');
+    if ($productsInSession) {
+        $user = Auth::user();
+        $productsInCart = Product::findMany(array_keys($productsInSession));
+        
+        // 1. Calcular el total antes de procesar nada
+        $total = 0;
+        foreach ($productsInCart as $product) {
+            $quantity = $productsInSession[$product->getId()];
+            $total += ($product->getPrice() * $quantity);
         }
+
+        // 2. CONTROL DE SALDO: Validar si el usuario tiene dinero suficiente
+        if ($user->getBalance() < $total) {
+            // Redirigir con un mensaje de error
+            return redirect()->route('cart.index')->with('error', 'No tienes saldo suficiente para completar la compra.');
+        }
+
+        // 3. Si tiene saldo, procedemos a crear el pedido
+        $order = new Order();
+        $order->setUserId($user->getId());
+        $order->setTotal($total);
+        $order->save();
+
+        foreach ($productsInCart as $product) {
+            $quantity = $productsInSession[$product->getId()];
+            $item = new Item();
+            $item->setQuantity($quantity);
+            $item->setPrice($product->getPrice());
+            $item->setProductId($product->getId());
+            $item->setOrderId($order->getId());
+            $item->save();
+        }
+
+        // 4. Actualizar el saldo del usuario
+        $newBalance = $user->getBalance() - $total;
+        $user->setBalance($newBalance);
+        $user->save();
+
+        // 5. Limpiar carrito
+        $request->session()->forget('products');
+
+        $viewData = [
+            "title" => "Purchase - Online Store",
+            "subtitle" => "Purchase Status",
+            "order" => $order
+        ];
+        return view('cart.purchase')->with("viewData", $viewData);
+    } else {
+        return redirect()->route('cart.index');
     }
+}
 }
