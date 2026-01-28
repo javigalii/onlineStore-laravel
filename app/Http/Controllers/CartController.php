@@ -7,6 +7,8 @@ use App\Models\Order;
 use App\Models\Item;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderProcessed;
 
 class CartController extends Controller
 {
@@ -70,6 +72,7 @@ class CartController extends Controller
         $order->setUserId($user->getId());
         $order->setTotal($total);
         $order->save();
+        Mail::to($request->user()->email)->send(new OrderProcessed($order));
 
         foreach ($productsInCart as $product) {
             $quantity = $productsInSession[$product->getId()];

@@ -3,50 +3,87 @@
 @section('subtitle', $viewData['subtitle'])
 @section('content')
 
-    {{-- Bloque de error para saldo insuficiente  --}}
+    {{-- Bloque de error para saldo insuficiente con mejor estilo --}}
     @if (session('error'))
-        <div class="alert alert-danger shadow-sm border-start border-danger border-4">
-            <i class="bi bi-exclamation-octagon-fill me-2"></i>
-            {{ session('error') }}
+        <div class="alert alert-danger shadow-sm border-start border-danger border-4 d-flex align-items-center mb-4">
+            <i class="bi bi-exclamation-octagon-fill fs-4 me-3"></i>
+            <div>
+                <strong>¡Ups! Saldo insuficiente.</strong> {{ session('error') }}
+            </div>
         </div>
     @endif
 
-    <div class="card">
-        <div class="card-header">
-            Products in Cart
+    <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-cart-check-fill me-2 text-primary"></i> Tu Carrito de Compras</h5>
         </div>
-        <div class="card-body">
-            <table class="table table-bordered table-striped text-center">
-                <thead>
-                    <tr>
-                        <th scope="col">ID</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Price</th>
-                        <th scope="col">Quantity</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($viewData['products'] as $product)
+        <div class="card-body p-0"> {{-- Quitamos padding para que la tabla llegue a los bordes --}}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 text-center">
+                    <thead class="table-light">
                         <tr>
-                            <td>{{ $product->getId() }}</td>
-                            <td>{{ $product->getName() }}</td>
-                            <td>${{ $product->getPrice() }}</td>
-                            <td>{{ session('products')[$product->getId()] }}</td>
+                            <th scope="col" class="py-3">ID</th>
+                            <th scope="col" class="py-3 text-start">Producto 📦</th>
+                            <th scope="col" class="py-3">Precio</th>
+                            <th scope="col" class="py-3">Cantidad</th>
+                            <th scope="col" class="py-3">Subtotal</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
-            <div class="row">
-                <div class="text-end">
-                    <a class="btn btn-outline-secondary mb-2"><b>Total to pay:</b> ${{ $viewData['total'] }}</a>
-                    @if (count($viewData['products']) > 0)
-                        <a href="{{ route('cart.purchase') }}" class="btn bg-primary text-white mb-2">Purchase</a>
-                        <a href="{{ route('cart.delete') }}">
-                            <button class="btn btn-danger mb-2">
-                                Remove all products from Cart
-                            </button>
-                        </a>
-                    @endif
+                    </thead>
+                    <tbody>
+                        @forelse ($viewData['products'] as $product)
+                            @php $quantity = session('products')[$product->getId()]; @endphp
+                            <tr>
+                                <td class="text-muted">#{{ $product->getId() }}</td>
+                                <td class="text-start fw-bold">{{ $product->getName() }}</td>
+                                <td>${{ number_format($product->getPrice(), 2) }}</td>
+                                <td>
+                                    <span class="badge rounded-pill bg-info text-dark px-3">{{ $quantity }}</span>
+                                </td>
+                                <td class="fw-bold text-primary">
+                                    ${{ number_format($product->getPrice() * $quantity, 2) }}
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="py-5 text-muted">
+                                    <i class="bi bi-cart-x display-4 d-block mb-3"></i>
+                                    Tu carrito está vacío. ¡Añade algo de tecnología!
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- Resumen y Acciones --}}
+            <div class="p-4 bg-light border-top">
+                <div class="row align-items-center">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        @if (count($viewData['products']) > 0)
+                            <a href="{{ route('cart.delete') }}" class="text-danger text-decoration-none small fw-bold">
+                                <i class="bi bi-trash3-fill me-1"></i> Vaciar mi carrito
+                            </a>
+                        @endif
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <div class="mb-3">
+                            <span class="text-muted text-uppercase small fw-bold">Total a pagar:</span>
+                            <h3 class="fw-bold text-dark d-inline ms-2">${{ number_format($viewData['total'], 2) }}</h3>
+                        </div>
+
+                        @if (count($viewData['products']) > 0)
+                            <div class="d-flex justify-content-end gap-2">
+                                <a href="{{ route('product.index') }}" class="btn btn-outline-secondary px-4">
+                                    Seguir comprando
+                                </a>
+                                <a href="{{ route('cart.purchase') }}" class="btn btn-primary btn-lg px-5 shadow-sm">
+                                    Finalizar Compra <i class="bi bi-credit-card-2-front ms-2"></i>
+                                </a>
+                            </div>
+                        @else
+                            <a href="{{ route('product.index') }}" class="btn btn-primary px-5">Ver productos</a>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>

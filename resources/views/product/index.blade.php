@@ -5,25 +5,47 @@
 
     <div class="row" id="product-grid">
         @foreach ($viewData['products'] as $product)
-            <div class="col-md-4 col-lg-3 mb-2 product-item">
-                <div class="card">
-                    <img src="{{ asset('/storage/' . $product->getImage()) }}" class="card-img-top img-card">
-                    <div class="card-body text-center">
-                        <a href="{{ route('product.show', ['id' => $product->getId()]) }}"
-                            class="btn bg-primary text-white">{{ $product->getName() }}</a>
+            <div class="col-md-4 col-lg-3 mb-4 product-item">
+                <div class="card h-100 shadow-sm border-0">
+                    {{-- Imagen con un contenedor para asegurar proporciones --}}
+                    <div class="position-relative overflow-hidden">
+                        <img src="{{ asset('/storage/' . $product->getImage()) }}" class="card-img-top img-card p-3"
+                            alt="{{ $product->getName() }}">
+                        <span class="position-absolute top-0 end-0 m-3 badge rounded-pill bg-info text-dark">
+                            New ⚡
+                        </span>
+                    </div>
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold text-truncate">{{ $product->getName() }}</h5>
+                        <p class="card-text text-primary fs-5 fw-bold">
+                            💰 ${{ number_format($product->getPrice(), 2) }}
+                        </p>
+
+                        {{-- Espaciador para empujar el botón al final si los nombres varían de tamaño --}}
+                        <div class="mt-auto">
+                            <a href="{{ route('product.show', ['id' => $product->getId()]) }}"
+                                class="btn btn-primary w-100 py-2">
+                                <i class="bi bi-eye-fill me-2"></i> Ver Detalles
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         @endforeach
     </div>
 
-    <div id="pagination-sentinel" style="height: 50px;"></div>
-
-    <div id="loading-spinner" class="text-center my-3" style="display: none;">
-        <div class="spinner-border text-primary" role="status"></div>
-        <p>Cargando más productos...</p>
+    {{-- Centinela para el scroll infinito --}}
+    <div id="pagination-sentinel" class="py-4">
+        <div id="loading-spinner" class="text-center" style="display: none;">
+            <div class="spinner-grow text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="text-muted mt-2">✨ Buscando más tecnología para ti...</p>
+        </div>
     </div>
 
+    {{-- Paginación oculta --}}
     <div id="hidden-pagination" style="display: none;">
         {{ $viewData['products']->links() }}
     </div>
@@ -36,7 +58,6 @@
             let isFetching = false;
 
             const observer = new IntersectionObserver((entries) => {
-                // Buscamos el link de "Siguiente" dentro del div de paginación
                 let nextLink = document.querySelector('#hidden-pagination a[rel="next"]');
                 let nextPageUrl = nextLink ? nextLink.href : null;
 
@@ -44,7 +65,7 @@
                     loadMore(nextPageUrl);
                 }
             }, {
-                rootMargin: '100px'
+                rootMargin: '200px'
             });
 
             observer.observe(sentinel);
@@ -59,12 +80,17 @@
                         const parser = new DOMParser();
                         const doc = parser.parseFromString(html, 'text/html');
 
-                        // 1. Extraemos los nuevos productos y los añadimos al grid
                         const newItems = doc.querySelectorAll('.product-item');
-                        newItems.forEach(item => grid.appendChild(item));
+                        newItems.forEach(item => {
+                            // Añadimos una pequeña animación de entrada
+                            item.style.opacity = '0';
+                            grid.appendChild(item);
+                            setTimeout(() => {
+                                item.style.opacity = '1';
+                                item.style.transition = 'opacity 0.5s';
+                            }, 10);
+                        });
 
-                        // 2. IMPORTANTE: Reemplazamos el contenido del div de paginación
-                        // con el nuevo HTML recibido (que ahora tendrá el link a la página 3, luego 4...)
                         const newPaginationHtml = doc.querySelector('#hidden-pagination').innerHTML;
                         document.getElementById('hidden-pagination').innerHTML = newPaginationHtml;
 
