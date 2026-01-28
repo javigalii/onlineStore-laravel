@@ -38,7 +38,31 @@
                         <i class="bi bi-info-circle me-2"></i>
                         {{ $viewData['product']->getDescription() }}
                     </p>
+                    {{-- Mejora: Compartir en Redes Sociales --}}
+                    <div class="share-section mt-4 mb-4">
+                        <p class="fw-bold small text-uppercase text-muted mb-2">Compartir producto:</p>
+                        <div class="d-flex gap-2">
+                            <a href="https://api.whatsapp.com/send?text=¡Mira este producto en Tech Store! {{ urlencode($viewData['product']->getName()) }}: {{ Request::fullUrl() }}"
+                                target="_blank" class="btn btn-sm btn-success shadow-sm">
+                                <i class="bi bi-whatsapp"></i>
+                            </a>
 
+                            <a href="https://twitter.com/intent/tweet?text=Echa un vistazo a este {{ urlencode($viewData['product']->getName()) }} en Tech Store&url={{ Request::fullUrl() }}"
+                                target="_blank" class="btn btn-sm btn-dark shadow-sm">
+                                <i class="bi bi-twitter-x"></i>
+                            </a>
+
+                            <a href="https://www.facebook.com/sharer/sharer.php?u={{ Request::fullUrl() }}" target="_blank"
+                                class="btn btn-sm btn-primary shadow-sm">
+                                <i class="bi bi-facebook"></i>
+                            </a>
+
+                            <button onclick="copyToClipboard()" class="btn btn-sm btn-secondary shadow-sm"
+                                title="Copiar enlace">
+                                <i class="bi bi-link-45deg"></i>
+                            </button>
+                        </div>
+                    </div>
                     <form method="POST" action="{{ route('cart.add', ['id' => $viewData['product']->getId()]) }}">
                         @csrf
                         <div class="row g-3 align-items-center">
@@ -59,6 +83,37 @@
                             </div>
                         </div>
                     </form>
+                    {{-- Sección de Comentarios --}}
+                    <div class="card mt-4 shadow-sm">
+                        <div class="card-header bg-dark text-white">Comentarios de Clientes 💬</div>
+                        <div class="card-body">
+                            @forelse($viewData["product"]->comments as $comment)
+                                <div class="border-bottom mb-3 pb-2">
+                                    <span class="fw-bold text-primary">{{ $comment->user->getName() }}</span>
+                                    <small class="text-muted ms-2">{{ $comment->created_at->diffForHumans() }}</small>
+                                    <p class="mb-0">{{ $comment->description }}</p>
+                                </div>
+                            @empty
+                                <p class="text-muted">Sé el primero en opinar sobre este producto.</p>
+                            @endforelse
+
+                            @auth
+                                <form action="{{ route('comment.store', $viewData['product']->getId()) }}" method="POST"
+                                    class="mt-4">
+                                    @csrf
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Deja tu opinión:</label>
+                                        <textarea name="description" class="form-control" rows="3" placeholder="¿Qué te pareció este producto?"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Publicar Comentario</button>
+                                </form>
+                            @else
+                                <div class="alert alert-info mt-3">
+                                    Debes <a href="{{ route('login') }}">iniciar sesión</a> para comentar.
+                                </div>
+                            @endauth
+                        </div>
+                    </div>
 
                     <div class="mt-5 d-flex gap-3">
                         <small class="text-muted"><i class="bi bi-truck"></i> Free Shipping</small>

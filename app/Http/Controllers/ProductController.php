@@ -18,7 +18,7 @@ class ProductController extends Controller{
 
     public function show($id){
         $viewData = [];
-        $product = Product::findOrFail($id);
+        $product = Product::with(['comments.user'])->findOrFail($id);
 
         $viewData["title"] = $product->getName()." - Online Store";
         $viewData["subtitle"] = $product->getName()." - Product information";

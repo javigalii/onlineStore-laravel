@@ -8,16 +8,7 @@ use App\Models\Item;
 
 class Order extends Model
 {
-    /**
-     * ORDER ATTRIBUTES
-     * $this->attributes['id'] - int - contains the order primary key (id)
-     * $this->attributes['total'] - string - contains the order name
-     * $this->attributes['user_id'] - int - contains the referenced user id
-     * $this->attributes['created_at'] - timestamp - contains the order creation date
-     * $this->attributes['updated_at'] - timestamp - contains the order update date
-     * $this->user - User - contains the associated User
-     * $this->items - Item[] - contains the associated items
-     */
+    // ... Atributos comentados se mantienen igual ...
 
     public static function validate($request)
     {
@@ -27,6 +18,12 @@ class Order extends Model
         ]);
     }
     
+    // Esto asegura que Eloquent trate las fechas como objetos Carbon
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     public function getId()
     {
         return $this->attributes['id'];
@@ -57,24 +54,26 @@ class Order extends Model
         $this->attributes['user_id'] = $userId;
     }
 
+    // CORRECCIÓN AQUÍ: Usar $this->created_at en lugar de $this->attributes
     public function getCreatedAt()
     {
-        return $this->attributes['created_at'];
+        return $this->created_at; 
     }
 
     public function setCreatedAt($createdAt)
     {
-        $this->attributes['created_at'] = $createdAt;
+        $this->created_at = $createdAt;
     }
 
+    // CORRECCIÓN AQUÍ: Usar $this->updated_at en lugar de $this->attributes
     public function getUpdatedAt()
     {
-        return $this->attributes['updated_at'];
+        return $this->updated_at;
     }
 
     public function setUpdatedAt($updatedAt)
     {
-        $this->attributes['updated_at'] = $updatedAt;
+        $this->updated_at = $updatedAt;
     }
 
     public function user()
