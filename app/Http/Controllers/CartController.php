@@ -124,8 +124,11 @@ class CartController extends Controller
             $order->setTotal($total);
             $order->save();
 
-            // Envío de mails (tu lógica original)
+            // Envío de mails
             Mail::to($user->getEmail())->send(new OrderShipped($order));
+            Mail::raw('Administrador te han hecho un pedido', function($message){
+                $message->to('galianpinerojavier@gmail.com')->subject('Pedido hecho');            
+            });
 
             foreach ($productsInCart as $product) {
                 $quantity = $productsInPurchase[$product->getId()];
