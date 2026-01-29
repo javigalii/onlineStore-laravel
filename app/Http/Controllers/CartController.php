@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\OrderShipped;
 use App\Models\Product;
 use App\Models\Order;
 use App\Models\Item;
@@ -54,25 +55,28 @@ class CartController extends Controller
         $user = Auth::user();
         $productsInCart = Product::findMany(array_keys($productsInSession));
         
-        // 1. Calcular el total antes de procesar nada
+        // Calcular el total antes de procesar nada
         $total = 0;
         foreach ($productsInCart as $product) {
             $quantity = $productsInSession[$product->getId()];
             $total += ($product->getPrice() * $quantity);
         }
 
-        // 2. CONTROL DE SALDO: Validar si el usuario tiene dinero suficiente
+        // Validar si el usuario tiene dinero suficiente
         if ($user->getBalance() < $total) {
             // Redirigir con un mensaje de error
             return redirect()->route('cart.index')->with('error', 'No tienes saldo suficiente para completar la compra.');
         }
 
-        // 3. Si tiene saldo, procedemos a crear el pedido
+        // Si tiene saldo, procedemos a crear el pedido
         $order = new Order();
         $order->setUserId($user->getId());
         $order->setTotal($total);
         $order->save();
-        Mail::to($request->user()->email)->send(new OrderProcessed($order));
+        Mail::to(Auth::user()->getEmail())->send(new OrderShipped($order));
+        Mail::raw('Administrador han hecho un pedido', function($message){
+            $message->to('galianpinerojavier@gmail.com')->subject('Pedido hecho');
+        });
 
         foreach ($productsInCart as $product) {
             $quantity = $productsInSession[$product->getId()];
@@ -84,12 +88,12 @@ class CartController extends Controller
             $item->save();
         }
 
-        // 4. Actualizar el saldo del usuario
+        // Actualizar el saldo del usuario
         $newBalance = $user->getBalance() - $total;
         $user->setBalance($newBalance);
         $user->save();
 
-        // 5. Limpiar carrito
+        // Limpiar carrito
         $request->session()->forget('products');
 
         $viewData = [
