@@ -3,7 +3,7 @@
 @section('subtitle', $viewData['subtitle'])
 @section('content')
 
-    {{-- Bloque de error para saldo insuficiente con mejor estilo --}}
+    {{-- Bloque de error para saldo insuficiente --}}
     @if (session('error'))
         <div class="alert alert-danger shadow-sm border-start border-danger border-4 d-flex align-items-center mb-4">
             <i class="bi bi-exclamation-octagon-fill fs-4 me-3"></i>
@@ -17,7 +17,7 @@
         <div class="card-header bg-white py-3">
             <h5 class="mb-0 fw-bold"><i class="bi bi-cart-check-fill me-2 text-primary"></i> Tu Carrito de Compras</h5>
         </div>
-        <div class="card-body p-0"> {{-- Quitamos padding para que la tabla llegue a los bordes --}}
+        <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0 text-center">
                     <thead class="table-light">
@@ -31,9 +31,13 @@
                     </thead>
                     <tbody>
                         @forelse ($viewData['products'] as $product)
-                            @php $quantity = session('products')[$product->getId()]; @endphp
+                            @php
+                                // Extraemos la cantidad del array que enviamos desde el controlador
+                                $productId = $product->getId();
+                                $quantity = $viewData['quantities'][$productId] ?? 0;
+                            @endphp
                             <tr>
-                                <td class="text-muted">#{{ $product->getId() }}</td>
+                                <td class="text-muted">#{{ $productId }}</td>
                                 <td class="text-start fw-bold">{{ $product->getName() }}</td>
                                 <td>${{ number_format($product->getPrice(), 2) }}</td>
                                 <td>

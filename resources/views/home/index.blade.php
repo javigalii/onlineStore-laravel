@@ -10,7 +10,7 @@
     <div class="row">
         <div class="col-md-6 col-lg-4 mb-4">
             <div class="card border-0 shadow-sm">
-                <img src="{{ asset('/img/game.png') }}" class="card-img-top img-fluid rounded">
+                <img src="{{ asset('/img/stream.webp') }}" class="card-img-top img-fluid rounded">
                 <div class="card-body text-center">
                     <h5 class="fw-bold">Gaming</h5>
                 </div>
@@ -18,7 +18,7 @@
         </div>
         <div class="col-md-6 col-lg-4 mb-4">
             <div class="card border-0 shadow-sm">
-                <img src="{{ asset('/img/safe.png') }}" class="card-img-top img-fluid rounded">
+                <img src="{{ asset('/img/camara.webp') }}" class="card-img-top img-fluid rounded">
                 <div class="card-body text-center">
                     <h5 class="fw-bold">Seguridad</h5>
                 </div>
@@ -26,7 +26,7 @@
         </div>
         <div class="col-md-6 col-lg-4 mb-4">
             <div class="card border-0 shadow-sm">
-                <img src="{{ asset('/img/submarine.png') }}" class="card-img-top img-fluid rounded">
+                <img src="{{ asset('/img/dron.webp') }}" class="card-img-top img-fluid rounded">
                 <div class="card-body text-center">
                     <h5 class="fw-bold">Exploración</h5>
                 </div>

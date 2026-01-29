@@ -1,41 +1,61 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+
+// Importamos los Controladores (para usar la sintaxis moderna [Clase::class, 'metodo'])
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\MyAccountController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\Admin\AdminHomeController;
+use App\Http\Controllers\Admin\AdminProductController;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
 */
-Route::post('/products/{id}/comment', [CommentController::class, 'store'])->name("comment.store")->middleware('auth');
-Route::get('/', 'App\Http\Controllers\HomeController@index')->name("home.index");
-Route::get('/about', 'App\Http\Controllers\HomeController@about')->name("about.index");
-Route::get('/products', 'App\Http\Controllers\ProductController@index')->name("product.index");
-Route::get('/products/{id}', 'App\Http\Controllers\ProductController@show')->name("product.show");
 
-Route::get('/cart', 'App\Http\Controllers\CartController@index')->name("cart.index");
-Route::get('/cart/delete', 'App\Http\Controllers\CartController@delete')->name("cart.delete");
-Route::post('/cart/add/{id}', 'App\Http\Controllers\CartController@add')->name("cart.add");
+// 1. Rutas de Autenticación (Con verificación activada)
+Auth::routes(['verify' => true]);
 
-Route::middleware('auth')->group(function () {
-    Route::get('/cart/purchase', 'App\Http\Controllers\CartController@purchase')->name("cart.purchase");
-    Route::get('/my-account/orders', 'App\Http\Controllers\MyAccountController@orders')->name("myorders.index");
+// 2. Rutas Públicas (Cualquiera puede verlas)
+Route::get('/', [HomeController::class, 'index'])->name("home.index");
+Route::get('/about', [HomeController::class, 'about'])->name("about.index");
+
+// Productos
+Route::get('/products', [ProductController::class, 'index'])->name("product.index");
+Route::get('/products/{id}', [ProductController::class, 'show'])->name("product.show");
+
+// Carrito (Generalmente se permite añadir/ver sin estar logueado, se pide login al pagar)
+Route::get('/cart', [CartController::class, 'index'])->name("cart.index");
+Route::post('/cart/add/{id}', [CartController::class, 'add'])->name("cart.add");
+Route::get('/cart/delete', [CartController::class, 'delete'])->name("cart.delete");
+
+
+// 3. Rutas para Usuarios Verificados
+// Aquí aplicamos 'auth' Y 'verified'. Si no han verificado el email, no entran aquí.
+Route::middleware(['auth', 'verified'])->group(function () {
+    
+    // Compras y Cuenta
+    Route::get('/cart/purchase', [CartController::class, 'purchase'])->name("cart.purchase");
+    Route::get('/my-account/orders', [MyAccountController::class, 'orders'])->name("myorders.index");
+    
+    // Comentarios (Movido aquí para evitar spam de cuentas falsas)
+    Route::post('/products/{id}/comment', [CommentController::class, 'store'])->name("comment.store");
 });
 
-Route::middleware('admin')->group(function () {
-    Route::get('/admin', 'App\Http\Controllers\Admin\AdminHomeController@index')->name("admin.home.index");
-    Route::get('/admin/products', 'App\Http\Controllers\Admin\AdminProductController@index')->name("admin.product.index");
-    Route::post('/admin/products/store', 'App\Http\Controllers\Admin\AdminProductController@store')->name("admin.product.store");
-    Route::delete('/admin/products/{id}/delete', 'App\Http\Controllers\Admin\AdminProductController@delete')->name("admin.product.delete");
-    Route::get('/admin/products/{id}/edit', 'App\Http\Controllers\Admin\AdminProductController@edit')->name("admin.product.edit");
-    Route::put('/admin/products/{id}/update', 'App\Http\Controllers\Admin\AdminProductController@update')->name("admin.product.update");
+
+// 4. Rutas de Administrador
+Route::middleware(['auth', 'admin'])->group(function () { // Se recomienda añadir 'auth' antes de 'admin' por seguridad
+    Route::get('/admin', [AdminHomeController::class, 'index'])->name("admin.home.index");
+    
+    // Gestión de Productos
+    Route::get('/admin/products', [AdminProductController::class, 'index'])->name("admin.product.index");
+    Route::post('/admin/products/store', [AdminProductController::class, 'store'])->name("admin.product.store");
+    Route::get('/admin/products/{id}/edit', [AdminProductController::class, 'edit'])->name("admin.product.edit");
+    Route::put('/admin/products/{id}/update', [AdminProductController::class, 'update'])->name("admin.product.update");
+    Route::delete('/admin/products/{id}/delete', [AdminProductController::class, 'delete'])->name("admin.product.delete");
 });
-
-
-Auth::routes();
