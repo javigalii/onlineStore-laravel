@@ -19,7 +19,7 @@ class CommentController extends Controller
         Comment::create([
             'description' => $request->input('description'),
             'product_id' => $productId,
-            'user_id' => Auth::id(), // ID del usuario logueado
+            'user_id' => Auth::id(), 
         ]);
 
         // 3. Volver a la página del producto con un mensaje de éxito

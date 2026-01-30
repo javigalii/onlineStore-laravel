@@ -11,6 +11,7 @@ use App\Http\Controllers\MyAccountController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\Admin\AdminHomeController;
 use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\AdminOrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,6 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // 4. Rutas de Administrador
 Route::middleware(['auth', 'admin'])->group(function () { // Se recomienda añadir 'auth' antes de 'admin' por seguridad
     Route::get('/admin', [AdminHomeController::class, 'index'])->name("admin.home.index");
+    Route::get('/admin/orders', [AdminOrderController::class, 'index'])->name("admin.order.index");
     
     // Gestión de Productos
     Route::get('/admin/products', [AdminProductController::class, 'index'])->name("admin.product.index");

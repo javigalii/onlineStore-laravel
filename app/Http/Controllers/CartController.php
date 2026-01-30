@@ -46,7 +46,7 @@ class CartController extends Controller
             "subtitle" => "Shopping Cart",
             "total" => $total,
             "products" => $productsInCart,
-            "quantities" => $quantities // Pasamos las cantidades a la vista
+            "quantities" => $quantities 
         ];
         
         return view('cart.index')->with("viewData", $viewData);
