@@ -12,6 +12,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\Admin\AdminHomeController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminOrderController;
+use App\Http\Controllers\BalanceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,10 +20,10 @@ use App\Http\Controllers\Admin\AdminOrderController;
 |--------------------------------------------------------------------------
 */
 
-// 1. Rutas de Autenticación (Con verificación activada)
+// 1. Rutas de Autenticación 
 Auth::routes(['verify' => true]);
 
-// 2. Rutas Públicas (Cualquiera puede verlas)
+// 2. Rutas Públicas 
 Route::get('/', [HomeController::class, 'index'])->name("home.index");
 Route::get('/about', [HomeController::class, 'about'])->name("about.index");
 
@@ -30,11 +31,16 @@ Route::get('/about', [HomeController::class, 'about'])->name("about.index");
 Route::get('/products', [ProductController::class, 'index'])->name("product.index");
 Route::get('/products/{id}', [ProductController::class, 'show'])->name("product.show");
 
-// Carrito (Generalmente se permite añadir/ver sin estar logueado, se pide login al pagar)
+// Carrito 
 Route::get('/cart', [CartController::class, 'index'])->name("cart.index");
 Route::post('/cart/add/{id}', [CartController::class, 'add'])->name("cart.add");
 Route::get('/cart/delete', [CartController::class, 'delete'])->name("cart.delete");
 
+// Balance
+Route::middleware('auth')->group(function () {
+    Route::get('/balance', [BalanceController::class, 'index'])->name('balance.index');
+    Route::post('/balance/add', [BalanceController::class, 'add'])->name('balance.add');
+});
 
 // 3. Rutas para Usuarios Verificados
 // Aquí aplicamos 'auth' Y 'verified'. Si no han verificado el email, no entran aquí.

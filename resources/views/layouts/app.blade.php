@@ -34,6 +34,12 @@
             <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                 <div class="navbar-nav ms-auto">
                     {{-- Rutas corregidas según tu web.php --}}
+                    {{-- Solo mostramos el saldo si el usuario está autenticado --}}
+                    @auth
+                        <a class="nav-link active text-success fw-bold" href="{{ route('balance.index') }}">
+                            <i class="bi bi-cash-stack"></i> ${{ number_format(Auth::user()->getBalance(), 2) }}
+                        </a>
+                    @endauth
                     <a class="nav-link active" href="{{ route('home.index') }}">🏠 Home</a>
                     <a class="nav-link active" href="{{ route('product.index') }}">💻 Products</a>
                     <a class="nav-link active" href="{{ route('cart.index') }}">
