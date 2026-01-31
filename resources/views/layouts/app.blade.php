@@ -9,7 +9,7 @@
 
     {{-- Archivos CSS --}}
     <link href="{{ asset('/css/app.css') }}" rel="stylesheet" />
-    <link href="{{ asset('/css/mejora.css') }}" rel="stylesheet" /> {{-- Tu nuevo CSS --}}
+    <link href="{{ asset('/css/mejora.css') }}" rel="stylesheet" />
 
     <title>@yield('title', 'Tech Store ⚡')</title>
 
@@ -18,7 +18,7 @@
 
     {{-- Iconos y Fuentes --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
